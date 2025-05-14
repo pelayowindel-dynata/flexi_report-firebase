@@ -1,0 +1,129 @@
+i create a react TS app using vite.
+I have a FireStore Database.
+which have collection of user and v2_events
+this is the sample contents of the collections 
+```
+user : [
+  {
+    docId : 'D7IlY8iZPFSBG5XrjoTsQUlSwjQ2'
+    approvalStatus :"approved" //(string)
+    course : "College of Computer Studies" //(string)
+    email :"mparatia@gmail.com" // (string)
+    name : "Mark P. Aratia" //(string)
+    profile_picture ""https://firebasestorage.googleapis.com/v0/b/flexievent-adbbb.appspot.com/o/user_profiles%2F00SkAqIKFQN6hIcfsus5LFeHGxA2?alt=media&token=32912b0c-ae5e-4be0-b6c2-215bf8a43535" //(string)
+    role :   "Student" //(string)
+    yearLevel : "1st Year"
+  }, 
+  ....
+]
+
+
+v2_event : [
+  {
+    id : zApUBOp0wmKJtKflt0xI
+    date : April 10, 2025 at 12:00:00 AM UTC+8 //(timestamp),
+    department : "CCS" //(string),
+    description : "college fiesta 4th day " //(string),
+    end_time_string : "12:00 PM" //(string),
+    isDeleted : false //(boolean),
+    start_time_string : "8:00 AM" //(string),
+    title : "College Fiesta 4th Day - Morning" //(string),
+    venue : "i5ZClYogH2GNzVPb3tp3",
+    logs : [
+      {
+        logType : "in",
+        timestamp : April 10, 2025 at 1:54:31 PM UTC+8
+        userId : 'npQsirJLWOb8z0AP8r9wmNjIxfM2'
+      },
+      {
+        logType : "out",
+        timestamp : April 10, 2025 at 1:54:31 PM UTC+8
+        userId : 'npQsirJLWOb8z0AP8r9wmNjIxfM2'
+      },
+      {
+        logType : "out",
+        timestamp : April 10, 2025 at 1:54:31 PM UTC+8
+        userId : 'D7IlY8iZPFSBG5XrjoTsQUlSwjQ2'
+      },
+      {
+        logType : "in",
+        timestamp : April 10, 2025 at 1:54:31 PM UTC+8
+        userId : 'D7IlY8iZPFSBG5XrjoTsQUlSwjQ2'
+      },
+      .....
+    ]
+  },
+  {
+    id : d9ia4Q5BWKkqBupFNSPy
+    date : April 9, 2025 at 12:00:00 AM UTC+8 //(timestamp),
+    department : "CCS" //(string),
+    description : "college fiesta 4th day " //(string),
+    end_time_string : "12:00 PM" //(string),
+    isDeleted : false //(boolean),
+    start_time_string : "8:00 AM" //(string),
+    title : "College Fiesta 3rd Day - Morning" //(string),
+    venue : "i5ZClYogH2GNzVPb3tp3",
+    logs : [
+      {
+        logType : "out",
+        timestamp : April 9, 2025 at 1:54:31 PM UTC+8
+        userId : 'D7IlY8iZPFSBG5XrjoTsQUlSwjQ2'
+      },
+      {
+        logType : "in",
+        timestamp : April 9, 2025 at 1:54:31 PM UTC+8
+        userId : 'D7IlY8iZPFSBG5XrjoTsQUlSwjQ2'
+      },
+      .....
+    ]
+  },
+]
+```
+
+
+given those collection I want to process and output an object that will be like this 
+```
+[
+  {
+    studentDocId : D7IlY8iZPFSBG5XrjoTsQUlSwjQ2,
+    studentName : "Mark P. Aratia"
+    events : [
+      {
+        eventId : zApUBOp0wmKJtKflt0xI,
+        title : "College Fiesta 4th Day - Morning",
+        loggedIn : true,
+        loggedOut : true
+      },
+      {
+        eventId: d9ia4Q5BWKkqBupFNSPy,
+        title : "College Fiesta 3rd Day - Morning",
+        loggedIn : true,
+        loggedOut : true
+      }
+      ...
+    ]
+  },
+  {
+    studentDocId : npQsirJLWOb8z0AP8r9wmNjIxfM2,
+    studentName : 'Unknown' //Unknown if userId from from logs collection is found on users collection or with no name field
+    events : [
+      {
+        eventId : zApUBOp0wmKJtKflt0xI,
+        title : "College Fiesta 4th Day - Morning",
+        loggedIn : true,
+        loggedOut : true
+      },
+      {
+        eventId: d9ia4Q5BWKkqBupFNSPy,
+        title : "College Fiesta 3rd Day - Morning",
+        loggedIn : false,
+        loggedOut : false
+      }
+      ...
+    ]
+  },
+  ....
+]
+```
+
+take not that there is a scenario where a student has a loggedIn but not loggedOut or vice-verse or not loggedIn or loggedOut at all
