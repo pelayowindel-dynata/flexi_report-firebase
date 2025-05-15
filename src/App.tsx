@@ -4,6 +4,7 @@ import { collection, getDoc, getDocs, orderBy, query } from "firebase/firestore"
 import { AttendanceTable } from "./components/AttendanceTable";
 import type { EventDoc, EventLog, UserDoc } from "./types";
 import { db } from "./firebase";
+import { AttendanceMatrix } from "./components/AttendanceMatrix";
 
 function App() {
   // State holds an array of UserDoc
@@ -23,48 +24,48 @@ function App() {
   };
   // 2) Fetch all events, pulling in the nested `logs` array
   const getSchoolEvents = async (): Promise<EventDoc[]> => {
-    
+
     const eventRef = collection(db, "v2_event");
     const logsQuery = query(eventRef, orderBy("date", "asc"));
     const eventSnap = await getDocs(logsQuery);
 
-  const eventsWithLogs = await Promise.all(
-    eventSnap.docs.map(async (evtDoc) => {
-      const data = evtDoc.data() as any;
+    const eventsWithLogs = await Promise.all(
+      eventSnap.docs.map(async (evtDoc) => {
+        const data = evtDoc.data() as any;
 
-      // Reference to the logs subcollection
-      const logsRef = collection(db, "v2_event", evtDoc.id, "logs");
-      const logsQuery = query(logsRef, orderBy("userId", "asc"));
-     
-      // Execute it
-      const logsSnap = await getDocs(logsQuery);
+        // Reference to the logs subcollection
+        const logsRef = collection(db, "v2_event", evtDoc.id, "logs");
+        const logsQuery = query(logsRef, orderBy("userId", "asc"));
 
-      // Map to your EventLog type
-      const rawLogs: EventLog[] = logsSnap.docs.map((logDoc) =>
-        logDoc.data() as EventLog
-      );
+        // Execute it
+        const logsSnap = await getDocs(logsQuery);
 
-      // (Optional) de-duplicate by userId + logType
-      const seen = new Set<string>();
-      const logs: EventLog[] = [];
-      for (const log of rawLogs) {
-        const key = `${log.userId}-${log.logType}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          logs.push(log);
+        // Map to your EventLog type
+        const rawLogs: EventLog[] = logsSnap.docs.map((logDoc) =>
+          logDoc.data() as EventLog
+        );
+
+        // (Optional) de-duplicate by userId + logType
+        const seen = new Set<string>();
+        const logs: EventLog[] = [];
+        for (const log of rawLogs) {
+          const key = `${log.userId}-${log.logType}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            logs.push(log);
+          }
         }
-      }
 
-      return {
-        id:    data.id ?? evtDoc.id,
-        title: data.title,
-        logs,   // now unique per userId+logType
-      };
-    })
-  );
+        return {
+          id: data.id ?? evtDoc.id,
+          title: data.title,
+          logs,   // now unique per userId+logType
+        };
+      })
+    );
 
-  return eventsWithLogs;
-}
+    return eventsWithLogs;
+  }
 
   // On mount, load both collections
   useEffect(() => {
@@ -103,7 +104,13 @@ function App() {
         </ul>
       </section>
 
-      <AttendanceTable />
+      <section style={{ marginBottom: 24 }}>
+        <h2>Attendance Matrix</h2>
+        <AttendanceMatrix students={students} events={schoolEvents} />
+      </section>
+
+
+      {/* <AttendanceTable /> */}
     </div>
   );
 }
